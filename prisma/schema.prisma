@@ -1,0 +1,180 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  ORGANIZER
+  REFEREE
+  PLAYER
+  CLUB_OWNER
+  USER
+}
+
+enum TournamentStatus {
+  DRAFT
+  REGISTRATION
+  DRAWN
+  ONGOING
+  COMPLETED
+  CANCELLED
+}
+
+enum MatchStatus {
+  UPCOMING
+  LIVE
+  FINISHED
+  CANCELLED
+}
+
+enum Discipline {
+  CAROM_3C
+  CAROM_1C
+  POOL_9B
+  POOL_10B
+  SNOOKER
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  password      String
+  name          String
+  avatar        String?
+  role          UserRole  @default(USER)
+  clubId        String?
+  club          Club?     @relation("ClubOwner", fields: [clubId], references: [id])
+  registrations Registration[]
+  matches1      Match[]   @relation("Player1")
+  matches2      Match[]   @relation("Player2")
+  organizedTournaments Tournament[] @relation("Organizer")
+  refereedMatches Match[] @relation("Referee")
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Club {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  address     String
+  phone       String?
+  email       String?
+  description String?
+  images      String[]
+  openingHours Json?
+  lat         Float?
+  lng         Float?
+  ownerId     String   @unique
+  owner       User     @relation("ClubOwner")
+  tables      Table[]
+  tournaments Tournament[]
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Table {
+  id        String   @id @default(cuid())
+  name      String
+  type      Discipline
+  size      String?
+  status    String   @default("AVAILABLE") // AVAILABLE, IN_USE, MAINTENANCE
+  clubId    String
+  club      Club     @relation(fields: [clubId], references: [id])
+  matches   Match[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Tournament {
+  id              String           @id @default(cuid())
+  name            String
+  slug            String           @unique
+  description     String?
+  banner          String?
+  startDate       DateTime
+  endDate         DateTime
+  regDeadline     DateTime
+  fee             Float            @default(0)
+  bankInfo        Json?
+  status          TournamentStatus @default(DRAFT)
+  organizerId     String
+  organizer       User             @relation("Organizer", fields: [organizerId], references: [id])
+  clubId          String?
+  club            Club?            @relation(fields: [clubId], references: [id])
+  categories      Category[]
+  registrations   Registration[]
+  sponsors        Sponsor[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model Category {
+  id              String     @id @default(cuid())
+  name            String
+  discipline      Discipline
+  technicalSettings Json?
+  tournamentId    String
+  tournament      Tournament @relation(fields: [tournamentId], references: [id])
+  registrations   Registration[]
+  matches         Match[]
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+}
+
+model Registration {
+  id            String   @id @default(cuid())
+  tournamentId  String
+  tournament    Tournament @relation(fields: [tournamentId], references: [id])
+  categoryId    String
+  category      Category @relation(fields: [categoryId], references: [id])
+  playerId      String
+  player        User     @relation(fields: [playerId], references: [id])
+  isPaid        Boolean  @default(false)
+  isCheckedIn   Boolean  @default(false)
+  seed          Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([categoryId, playerId])
+}
+
+model Match {
+  id            String      @id @default(cuid())
+  categoryId    String
+  category      Category    @relation(fields: [categoryId], references: [id])
+  player1Id     String?
+  player1       User?       @relation("Player1", fields: [player1Id], references: [id])
+  player2Id     String?
+  player2       User?       @relation("Player2", fields: [player2Id], references: [id])
+  refereeId     String?
+  referee       User?       @relation("Referee", fields: [refereeId], references: [id])
+  tableId       String?
+  table         Table?      @relation(fields: [tableId], references: [id])
+  score1        Int         @default(0)
+  score2        Int         @default(0)
+  status        MatchStatus @default(UPCOMING)
+  startTime     DateTime?
+  endTime       DateTime?
+  round         Int?
+  position      Int?
+  nextMatchId   String?
+  winnerId      String?
+  liveData      Json?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+}
+
+model Sponsor {
+  id            String     @id @default(cuid())
+  name          String
+  logo          String?
+  link          String?
+  tournamentId  String
+  tournament    Tournament @relation(fields: [tournamentId], references: [id])
+}

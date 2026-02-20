@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-bg-main: var(--bg-main);
+  --color-bg-card: var(--bg-card);
+  --color-bg-input: var(--bg-input);
+  --color-primary: #3B82F6;
+  --color-primary-hover: #60A5FA;
+  --color-text-main: var(--text-main);
+  --color-text-body: var(--text-body);
+  --color-text-muted: var(--text-muted);
+  --color-success: #10B981;
+  --color-danger: #EF4444;
+  --color-warning: #F59E0B;
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-2xl: 24px;
+}
+
+:root {
+  --bg-main: #0F0F10;
+  --bg-card: #18181B;
+  --bg-input: #27272A;
+  --text-main: #FAFAFA;
+  --text-body: #D4D4D8;
+  --text-muted: #71717A;
+}
+
+.light {
+  --bg-main: #F8FAFC;
+  --bg-card: #FFFFFF;
+  --bg-input: #F1F5F9;
+  --text-main: #0F172A;
+  --text-body: #334155;
+  --text-muted: #64748B;
+}
+
+.dark {
+  --bg-main: #0F0F10;
+  --bg-card: #18181B;
+  --bg-input: #27272A;
+  --text-main: #FAFAFA;
+  --text-body: #D4D4D8;
+  --text-muted: #71717A;
+}
+
+@layer base {
+  body {
+    background-color: var(--bg-main);
+    color: var(--text-body);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    letter-spacing: -0.01em;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--text-main);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer components {
+  .glass-panel {
+    background: var(--bg-card);
+    opacity: 0.8;
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(128, 128, 128, 0.1);
+  }
+  
+  .neo-border {
+    border: 1px solid rgba(128, 128, 128, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  }
+}
